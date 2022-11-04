@@ -13,7 +13,6 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     protected ResponseEntity<String> handleBusinessException(BindException bindException) {
-        System.out.println(bindException.getAllErrors());
         return new ResponseEntity<>("error", HttpStatus.valueOf(400));
     }
 
