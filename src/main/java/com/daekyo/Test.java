@@ -105,6 +105,13 @@ public class Test {
         }
 
         QBankNode rootNode = tempList.stream().filter(QBankNode::isRootNode).collect(Collectors.toList()).get(0);
-        System.out.println(rootNode);
+
+        System.out.println(rootNode.convertHtml());
+
+        /*
+            xml -> html tag 변환정보
+            속성 -> html 속성 변환정보
+            속성 -> style 속성 변환정보
+         */
     }
 }

@@ -5,10 +5,8 @@ import lombok.Getter;
 import lombok.ToString;
 import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @EqualsAndHashCode
@@ -36,5 +34,22 @@ public class QBankNode {
 
     public boolean isRootNode() {
         return xmlNode.getParentNode().getNodeName().equals("#document");
+    }
+
+    public String convertHtml() {
+        String style = attributeMap.entrySet().stream()
+                .map(entry -> String.format("%s:%s", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining(" "));
+
+        String opener = String.format("<%s style='%s'>", nodeName, style);
+        String closer = String.format("</%s>", nodeName);
+
+        String textHtml = Optional.ofNullable(textNodeList).orElse(Collections.emptyList())
+                .stream().map(TextNode::convertText).collect(Collectors.joining());
+
+        StringBuilder innerHtml = new StringBuilder();
+        subNodeList.forEach(row -> innerHtml.append(row.convertHtml()));
+
+        return opener + textHtml + innerHtml + closer;
     }
 }
