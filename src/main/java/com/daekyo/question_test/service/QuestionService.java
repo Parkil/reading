@@ -1,17 +1,36 @@
 package com.daekyo.question_test.service;
 
+import com.daekyo.entity.Test;
 import com.daekyo.question_test.Constant;
 import com.daekyo.question_test.vo.*;
+import com.daekyo.repo.TestRepo;
+import com.daekyo.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
+
+    private final TestRepo testRepo;
+
+    private final UserRepo userRepo;
+
+
+    @Transactional(readOnly = false) // readonly 여부에 따라 datasource 가 다르게 설정된다
+    public void test() {
+        testRepo.findAll().forEach(System.out::println);
+    }
+
+    public void test2() {
+        userRepo.findAll().forEach(System.out::println);
+    }
+
     public Lesson genTestLesson() {
 
         List<Question> questionList = new ArrayList<>();

@@ -58,4 +58,16 @@ public class QuestionController {
         return new ResponseEntity<>(questionService.replyAndNextQuestion(request.getSession(), questionKey, reply),
                 HttpStatus.OK);
     }
+
+    @GetMapping(value = "/question/routing_test_db1")
+    public ResponseEntity<String> routingTEst(){
+        questionService.test();
+        return new ResponseEntity<>("111222333", HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/question/routing_test_db2")
+    public ResponseEntity<String> routingTEst2(){
+        questionService.test2();
+        return new ResponseEntity<>("111222333", HttpStatus.OK);
+    }
 }
