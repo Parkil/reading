@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode
-public class Lesson {
-    private final List<SubLesson> subLessonList;
+public class UserReply {
+    private final String questionKey;
+    private final String userInputReply;
+
+    @Setter
+    private String correct;
 }

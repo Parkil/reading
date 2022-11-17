@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ReplyResponse {
+public class Scoring {
     private final String status;
     private final Question nextQuestion;
 }
