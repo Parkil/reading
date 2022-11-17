@@ -1,8 +1,6 @@
 package com.daekyo.spring_security;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import com.daekyo.exception.JWTException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -11,6 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -23,24 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         try {
-            String jwt = getJwtFromRequest(request); //request에서 jwt 토큰을 꺼낸다.
-            if (StringUtils.isNotEmpty(jwt) && JwtTokenProvider.validateToken(jwt)) {
-                String userId = JwtTokenProvider.getUserIdFromJWT(jwt); //jwt에서 사용자 id를 꺼낸다.
-
-                UserAuthentication authentication = new UserAuthentication(userId, null, null); //id를 인증한다.
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); //기본적으로 제공한 details 세팅
-
-                SecurityContextHolder.getContext().setAuthentication(authentication); //세션에서 계속 사용하기 위해 securityContext에 Authentication 등록
-            } else {
-                if (StringUtils.isEmpty(jwt)) {
-                    request.setAttribute("unauthorization", "401 인증키 없음.");
-                }
-
-                if (JwtTokenProvider.validateToken(jwt)) {
-                    request.setAttribute("unauthorization", "401-001 인증키 만료.");
-                }
-            }
-        } catch (Exception ex) {
+            String jwtToken = getJwtFromRequest(request);
+            JwtTokenProvider.validateToken(jwtToken);
+        } catch (JWTException ex) {
             logger.error("Could not set user authentication in security context", ex);
         }
 
@@ -48,10 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.isNotEmpty(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring("Bearer ".length());
+        String bearerToken = Optional.ofNullable(request.getHeader("Authorization")).orElse("");
+
+        Matcher matcher = Pattern.compile("^(Bearer )(.*)$").matcher(bearerToken);
+
+        if(matcher.find()) {
+            return matcher.group(2);
         }
-        return null;
+        return "";
     }
 }

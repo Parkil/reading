@@ -1,15 +1,12 @@
 package com.daekyo.spring_security;
 
+import com.daekyo.exception.JWTException;
 import io.jsonwebtoken.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 import java.util.Date;
 
 public class JwtTokenProvider {
-
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     private static final String JWT_SECRET = "secretKey";
 
@@ -43,21 +40,12 @@ public class JwtTokenProvider {
     }
 
     // Jwt 토큰 유효성 검사
-    public static boolean validateToken(String token) {
+    public static void validateToken(String token) throws JWTException{
         try {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
-            return true;
-        } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+        } catch (SignatureException | MalformedJwtException | ExpiredJwtException
+                 | UnsupportedJwtException | IllegalArgumentException ex) {
+            throw new JWTException(ex.getMessage(), ex);
         }
-        return false;
     }
 }
