@@ -1,4 +1,4 @@
-package com.daekyo.question_test.vo;
+package com.daekyo.question_test.vo.enum_vo;
 
 // 문항 난이도
 public enum QuestionDifficulty {
