@@ -5,6 +5,7 @@ import com.daekyo.question_test.util.CacheUtil;
 import com.daekyo.question_test.vo.Question;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.Text;
+import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -45,17 +46,30 @@ public class QuestionCache {
 
   @SuppressWarnings("unchecked")
   public void saveDrillStartQuestionList(List<Score> scoreList) {
-    List<Question> reserveQuestionList = (List<Question>)CacheUtil.get(Constant.ALL_QUESTION_INFO_KEY);
-    Pair<List<Question>, List<Question>> classifyQuestionPair =
-        questionCalcDifficulty.classifyQuestion(reserveQuestionList, scoreList);
+    if(scoreList.stream().allMatch(row -> row.getQuestionGroup() == QuestionGroup.BASE)) {
+      List<Question> reserveQuestionList = (List<Question>)CacheUtil
+          .get(Constant.ALL_QUESTION_INFO_KEY);
+      Pair<List<Question>, List<Question>> classifyQuestionPair =
+          questionCalcDifficulty.classifyQuestion(reserveQuestionList, scoreList);
 
-    CacheUtil.set(Constant.CURRENT_QUESTION_INFO_KEY, classifyQuestionPair.getLeft());
-    CacheUtil.set(Constant.ALL_QUESTION_INFO_KEY, classifyQuestionPair.getRight());
+      CacheUtil.set(Constant.DRILL_START_QUESTION_INFO_KEY, classifyQuestionPair.getLeft());
+      CacheUtil.set(Constant.ALL_QUESTION_INFO_KEY, classifyQuestionPair.getRight());
+    }
   }
 
   @SuppressWarnings("unchecked")
   public Question getDrillNextQuestion(Score score) {
-    List<Question> reserveQuestionList = (List<Question>)CacheUtil.get(Constant.ALL_QUESTION_INFO_KEY);
+    Score ongoingScore = (Score)CacheUtil.get(Constant.DRILL_ONGOING_SCORE_INFO_KEY);
+
+    if(ongoingScore == null) {
+      // todo 시작문제 캐시에서 값을 가져온다
+    }else {
+      CacheUtil.set(Constant.DRILL_ONGOING_SCORE_INFO_KEY, score);
+    }
+
+
+    List<Question> reserveQuestionList = (List<Question>)CacheUtil
+        .get(Constant.ALL_QUESTION_INFO_KEY);
 
     List<Score> wrapperList = new ArrayList<>();
     wrapperList.add(score);
