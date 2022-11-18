@@ -1,8 +1,10 @@
 package com.daekyo.question_test.component;
 
 import com.daekyo.question_test.vo.Question;
+import com.daekyo.question_test.vo.Score;
+import com.daekyo.question_test.vo.enum_vo.CorrectStatus;
 import com.daekyo.question_test.vo.enum_vo.QuestionDifficulty;
-import com.daekyo.question_test.vo.QuestionReply;
+import com.daekyo.question_test.vo.enum_vo.QuestionDifficultyRelation;
 import com.daekyo.question_test.vo.enum_vo.QuestionType;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,8 +14,34 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionCalcDifficulty {
 
-  // 기준문제 난이도 계산
-  public List<Pair<QuestionType, QuestionDifficulty>> getBaseDifficulty() {
+  private boolean isBaseQuestion(Question question,
+      List<Pair<QuestionType, QuestionDifficulty>> diffTargetList) {
+    return diffTargetList.stream().anyMatch(diff->
+         question.getQuestionType() == diff.getLeft()
+      && question.getQuestionDifficulty() == diff.getRight());
+  }
+
+  private boolean isPoolQuestion(Question question,
+      List<Question> baseQuestionList) {
+    return baseQuestionList.stream().noneMatch(compare ->
+        compare.getQuestionKey().equals(question.getQuestionKey()));
+  }
+
+  private Pair<List<Question>, List<Question>> classifyQuestionBasic(
+      List<Question> allQuestionList,
+      List<Pair<QuestionType, QuestionDifficulty>> targetList) {
+    List<Question> baseQuestionList = allQuestionList.stream()
+        .filter(question -> isBaseQuestion(question, targetList))
+        .collect(Collectors.toList());
+
+    List<Question> poolQuestionList = allQuestionList.stream()
+        .filter(question -> isPoolQuestion(question, baseQuestionList))
+        .collect(Collectors.toList());
+
+    return Pair.of(baseQuestionList, poolQuestionList);
+  }
+
+  private List<Pair<QuestionType, QuestionDifficulty>> getDifficultyByPrevLessonResult() {
     // todo 이전 레슨의 데이터를 가져와서 유형별 문제 난이도를 계산 하는 기능 추가
     return List.of(Pair.of(QuestionType.FACT, QuestionDifficulty.TA),
         Pair.of(QuestionType.INFERENCE, QuestionDifficulty.TB),
@@ -21,38 +49,31 @@ public class QuestionCalcDifficulty {
         Pair.of(QuestionType.CONCEPT, QuestionDifficulty.TA));
   }
 
-  // 드릴문제 시작 난이도 계산 ( 기준문제 풀이 결과에 따른 난이도 계산 )
-  public List<Pair<QuestionType, QuestionDifficulty>> getNextDifficulty(
-      List<QuestionReply> questionReplyList) {
-    return questionReplyList.stream()
-        .map(QuestionReply::getNextDifficulty).collect(Collectors.toList());
+  private List<Pair<QuestionType, QuestionDifficulty>> getDifficultyByScore(
+      List<Score> scoreList) {
+
+    return scoreList.stream().map(this::getDifficulty).collect(Collectors.toList());
   }
 
-  private boolean isBaseQuestion(Question question,
-      List<Pair<QuestionType, QuestionDifficulty>> standardDifficultyList) {
-    return standardDifficultyList.stream().anyMatch(diff->
-         question.getQuestionType() == diff.getLeft()
-      && question.getQuestionDifficulty() == diff.getRight());
+  private Pair<QuestionType, QuestionDifficulty> getDifficulty(Score score) {
+    QuestionDifficultyRelation questionDifficultyRelation =
+        QuestionDifficultyRelation.valueOf(score.getQuestionDifficulty().name());
+
+    QuestionDifficulty nextDifficulty = score.getCorrectStatus() == CorrectStatus.CORRECT ?
+        questionDifficultyRelation.getUpDifficulty() :
+        questionDifficultyRelation.getDownDifficulty();
+
+    return Pair.of(score.getQuestionType(), nextDifficulty);
   }
 
-  private boolean isPoolQuestion(Question question,
-      List<Pair<QuestionType, QuestionDifficulty>> standardDifficultyList) {
-    return standardDifficultyList.stream().anyMatch(diff->
-         question.getQuestionType() != diff.getLeft()
-      && question.getQuestionDifficulty() != diff.getRight());
-  }
-
-  // 전체 문제를 기준문제 + 나머지 문제로 분류
   public Pair<List<Question>, List<Question>> classifyQuestion(List<Question> allQuestionList) {
-    List<Pair<QuestionType, QuestionDifficulty>> standardDifficultyList = getBaseDifficulty();
-    List<Question> baseQuestionList = allQuestionList.stream()
-        .filter(question -> isBaseQuestion(question, standardDifficultyList))
-        .collect(Collectors.toList());
+    List<Pair<QuestionType, QuestionDifficulty>> targetList = getDifficultyByPrevLessonResult();
+    return classifyQuestionBasic(allQuestionList, targetList);
+  }
 
-    List<Question> poolQuestionList = allQuestionList.stream()
-        .filter(question -> isPoolQuestion(question, standardDifficultyList))
-        .collect(Collectors.toList());
-
-    return Pair.of(baseQuestionList, poolQuestionList);
+  public Pair<List<Question>, List<Question>> classifyQuestion(List<Question> allQuestionList,
+      List<Score> scoreList) {
+    List<Pair<QuestionType, QuestionDifficulty>> targetList = getDifficultyByScore(scoreList);
+    return classifyQuestionBasic(allQuestionList, targetList);
   }
 }

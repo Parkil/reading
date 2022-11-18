@@ -4,9 +4,7 @@ public class Constant {
 
     private Constant() {}
 
-    public static final String QUESTION_INFO_KEY = "questionInfo";
-    public static final String BASE_QUESTION_INFO_KEY = "baseQuestionInfo";
-    public static final String POOL_QUESTION_INFO_KEY = "poolQuestionInfo";
-
-    public static final String NEXT_DIFFICULTY_INFO_KEY = "nextDifficultyInfo";
+    public static final String TEXT_INFO_KEY = "textInfo";
+    public static final String ALL_QUESTION_INFO_KEY = "allQuestionInfo";
+    public static final String CURRENT_QUESTION_INFO_KEY = "currentQuestionInfo";
 }

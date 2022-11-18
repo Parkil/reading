@@ -1,6 +1,7 @@
 package com.daekyo.question_test.controller;
 
 import com.daekyo.question_test.service.QuestionService;
+import com.daekyo.question_test.vo.Question;
 import com.daekyo.question_test.vo.QuestionTime;
 import com.daekyo.question_test.vo.UserReply;
 import com.daekyo.question_test.vo.Score;
@@ -43,6 +44,11 @@ public class QuestionController {
     @PostMapping(value = "/question/scoring")
     public ResponseEntity<List<Score>> scoring(@RequestBody List<UserReply> userReplyList) {
         return new ResponseEntity<>(questionService.scoring(userReplyList),  HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/question/get_current_question_list")
+    public ResponseEntity<List<Question>> getCurrentQuestionList() {
+        return new ResponseEntity<>(questionService.getCurrentQuestionList(), HttpStatus.OK);
     }
 
     /*
