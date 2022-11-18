@@ -5,6 +5,7 @@ import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.enum_vo.CorrectStatus;
 import com.daekyo.question_test.vo.enum_vo.QuestionDifficulty;
 import com.daekyo.question_test.vo.enum_vo.QuestionDifficultyRelation;
+import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import com.daekyo.question_test.vo.enum_vo.QuestionType;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class QuestionCalcDifficulty {
   private Pair<List<Question>, List<Question>> classifyQuestionBasic(
       List<Question> allQuestionList,
       List<Pair<QuestionType, QuestionDifficulty>> targetList) {
+
     List<Question> baseQuestionList = allQuestionList.stream()
         .filter(question -> isBaseQuestion(question, targetList))
         .collect(Collectors.toList());
@@ -68,7 +70,17 @@ public class QuestionCalcDifficulty {
 
   public Pair<List<Question>, List<Question>> classifyQuestion(List<Question> allQuestionList) {
     List<Pair<QuestionType, QuestionDifficulty>> targetList = getDifficultyByPrevLessonResult();
-    return classifyQuestionBasic(allQuestionList, targetList);
+
+    Pair<List<Question>, List<Question>> classifyQuestionPair
+        = classifyQuestionBasic(allQuestionList, targetList);
+
+    List<Question> baseQuestionList = classifyQuestionPair.getLeft();
+    List<Question> drillQuestionList = classifyQuestionPair.getRight();
+
+    baseQuestionList.forEach(row -> row.setQuestionGroup(QuestionGroup.BASE));
+    drillQuestionList.forEach(row -> row.setQuestionGroup(QuestionGroup.DRILL));
+
+    return classifyQuestionPair;
   }
 
   public Pair<List<Question>, List<Question>> classifyQuestion(List<Question> allQuestionList,

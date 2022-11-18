@@ -7,4 +7,6 @@ public class Constant {
     public static final String TEXT_INFO_KEY = "textInfo";
     public static final String ALL_QUESTION_INFO_KEY = "allQuestionInfo";
     public static final String CURRENT_QUESTION_INFO_KEY = "currentQuestionInfo";
+
+    public static final String PREV_SCORE_INFO_KEY = "prevScoreInfo";
 }

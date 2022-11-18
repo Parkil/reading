@@ -7,6 +7,8 @@ import com.daekyo.question_test.vo.QuestionReply;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.UserReply;
 import com.daekyo.question_test.vo.enum_vo.CorrectStatus;
+import com.daekyo.question_test.vo.enum_vo.DrillStatus;
+import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class Scoring {
+
+  private final ScoreCache scoreCache;
 
   private List<QuestionReply> mergeQuestionAndReply(List<Question> currentQuestionList,
       List<UserReply> userReplyList) {
@@ -35,11 +39,34 @@ public class Scoring {
         ? CorrectStatus.CORRECT : CorrectStatus.INCORRECT;
   }
 
+  private DrillStatus chkDrillStatus(QuestionReply questionReply, List<Score> prevScoreList) {
+    Score prevScore = prevScoreList.stream()
+        .filter(prev -> prev.getQuestionType() == questionReply.getQuestionType())
+        .collect(Collectors.toList()).get(0);
+
+    return prevScore.getCorrectStatus() == CorrectStatus.CORRECT ? DrillStatus.DRILL_UP :
+        DrillStatus.DRILL_DOWN;
+  }
+
+  private int calcScore(QuestionReply questionReply) {
+    CorrectStatus result = chkResult(questionReply);
+
+    if(questionReply.getQuestionGroup() == QuestionGroup.BASE) {
+      return result == CorrectStatus.CORRECT ?
+        questionReply.getQuestionDifficulty().getCorrectScore()
+        : questionReply.getQuestionDifficulty().getInCorrectScore();
+    }else {
+      DrillStatus drillStatus = chkDrillStatus(questionReply, scoreCache.getScoreList());
+      return result == CorrectStatus.CORRECT ?
+          drillStatus.getCorrectScore() : drillStatus.getInCorrectScore();
+    }
+  }
+
   private Score convertScore(QuestionReply questionReply) {
     return new Score(questionReply.getQuestionKey(), questionReply.getQuestionGroup(),
         questionReply.getQuestionType(), questionReply.getQuestionDifficulty(),
-        questionReply.getUserInputReply(), questionReply.getCorrect(),
-        questionReply.getResult(), questionReply.getCommentary(),
+        calcScore(questionReply), questionReply.getUserInputReply(),
+        questionReply.getCorrect(), chkResult(questionReply), questionReply.getCommentary(),
         questionReply.getVideoUrl(), questionReply.getChkQuestion());
   }
 
@@ -49,7 +76,10 @@ public class Scoring {
 
     List<QuestionReply> questionReplyList = mergeQuestionAndReply(currentQuestionList, userReplyList);
 
-    questionReplyList.forEach(questionReply -> questionReply.setResult(chkResult(questionReply)));
-    return questionReplyList.stream().map(this::convertScore).collect(Collectors.toList());
+    List<Score> scoreList = questionReplyList.stream().map(this::convertScore).collect(Collectors.toList());
+    scoreCache.setScoreList(scoreList);
+
+    // todo DB에 채점이력을 저장하는 기능 추가
+    return scoreList;
   }
 }

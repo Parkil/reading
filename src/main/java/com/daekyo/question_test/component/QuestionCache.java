@@ -5,7 +5,6 @@ import com.daekyo.question_test.util.CacheUtil;
 import com.daekyo.question_test.vo.Question;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.Text;
-import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -38,16 +37,10 @@ public class QuestionCache {
     Pair<List<Question>, List<Question>> classifyQuestionPair
         = questionCalcDifficulty.classifyQuestion(reserveQuestionList);
 
-    List<Question> baseQuestionList = classifyQuestionPair.getLeft();
-    List<Question> drillQuestionList = classifyQuestionPair.getRight();
+    CacheUtil.set(Constant.CURRENT_QUESTION_INFO_KEY, classifyQuestionPair.getLeft());
+    CacheUtil.set(Constant.ALL_QUESTION_INFO_KEY, classifyQuestionPair.getRight());
 
-    baseQuestionList.forEach(row -> row.setQuestionGroup(QuestionGroup.BASE));
-    drillQuestionList.forEach(row -> row.setQuestionGroup(QuestionGroup.DRILL));
-
-    CacheUtil.set(Constant.CURRENT_QUESTION_INFO_KEY, baseQuestionList);
-    CacheUtil.set(Constant.ALL_QUESTION_INFO_KEY, drillQuestionList);
-
-    return baseQuestionList;
+    return classifyQuestionPair.getLeft();
   }
 
   @SuppressWarnings("unchecked")

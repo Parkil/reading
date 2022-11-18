@@ -23,6 +23,8 @@ public class Score {
     @JsonIgnore
     private final QuestionDifficulty questionDifficulty;
 
+    private final int questionScore;
+
     private final String userInputReply;
     private final String correct;
     private final CorrectStatus correctStatus;
