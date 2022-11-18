@@ -59,14 +59,6 @@ public class QuestionCache {
 
   @SuppressWarnings("unchecked")
   public Question getDrillNextQuestion(Score score) {
-    Score ongoingScore = (Score)CacheUtil.get(Constant.DRILL_ONGOING_SCORE_INFO_KEY);
-
-    if(ongoingScore == null) {
-      // todo 시작문제 캐시에서 값을 가져온다
-    }else {
-      CacheUtil.set(Constant.DRILL_ONGOING_SCORE_INFO_KEY, score);
-    }
-
 
     List<Question> reserveQuestionList = (List<Question>)CacheUtil
         .get(Constant.ALL_QUESTION_INFO_KEY);

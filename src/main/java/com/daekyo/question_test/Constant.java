@@ -9,5 +9,4 @@ public class Constant {
     public static final String CURRENT_QUESTION_INFO_KEY = "currentQuestionInfo";
     public static final String PREV_SCORE_INFO_KEY = "prevScoreInfo";
     public static final String DRILL_START_QUESTION_INFO_KEY = "drillStartQuestionInfo";
-    public static final String LATEST_SCORE_INFO_KEY = "latestOnGoingScoreInfo";
 }

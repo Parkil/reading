@@ -77,12 +77,15 @@ public class QuestionService {
     }
 
     public List<Score> scoring(List<UserReply> userReplyList) {
-        List<Score> resultList = scoring.scoring(userReplyList);
+        return scoring.scoring(userReplyList);
+    }
 
-        //todo 이부분을 드릴 문제 가져오는 부분에서 최초 한번만 실행하도록 변경 scoring 에는 채점 + 채점 데이터 저장 로직만 들어가도록
-        questionCache.saveDrillStartQuestionList(resultList);
+    public Question getNextDrillQuestion() {
+        //scoreCache.getScoreList() 의 questionGroup이 전부 BASE일 때만 questionCache.saveDrillStartQuestionList을 호출
+        // questionCache.saveDrillStartQuestionList(resultList);
+        //
 
-        return resultList;
+        return null;
     }
 
     public List<Question> getCurrentQuestionList(){
