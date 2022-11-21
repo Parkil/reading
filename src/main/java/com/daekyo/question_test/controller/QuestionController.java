@@ -46,10 +46,12 @@ public class QuestionController {
         return new ResponseEntity<>(questionService.scoring(userReplyList),  HttpStatus.OK);
     }
 
-    @GetMapping(value = "/question/get_current_question_list")
-    public ResponseEntity<List<Question>> getCurrentQuestionList() {
-        return new ResponseEntity<>(questionService.getCurrentQuestionList(), HttpStatus.OK);
+    @GetMapping(value = "/question/next_drill_question")
+    public ResponseEntity<Question> getNextDrillQuestion() {
+        return new ResponseEntity<>(questionService.getNextDrillQuestion(), HttpStatus.OK);
     }
+
+
 
     /*
     @GetMapping(value = "/question/routing_test_db1")

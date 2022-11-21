@@ -2,7 +2,8 @@ package com.daekyo.question_test.vo.enum_vo;
 
 public enum DrillStatus {
   DRILL_UP("드릴업", 1, 0),
-  DRILL_DOWN("드릴다운" ,0, -1);
+  DRILL_DOWN("드릴다운" ,0, -1),
+  NONE("해당사항없음", 0, 0);
 
   private final String desc;
   private final int correctScore;

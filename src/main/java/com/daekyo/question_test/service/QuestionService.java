@@ -1,6 +1,7 @@
 package com.daekyo.question_test.service;
 
-import com.daekyo.question_test.component.QuestionCache;
+import com.daekyo.question_test.component.Cache;
+import com.daekyo.question_test.component.QuestionProvider;
 import com.daekyo.question_test.component.QuestionParser;
 import com.daekyo.question_test.component.Scoring;
 import com.daekyo.question_test.util.HttpUtil;
@@ -9,6 +10,7 @@ import com.daekyo.question_test.vo.QuestionTime;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.Text;
 import com.daekyo.question_test.vo.UserReply;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -54,9 +56,11 @@ public class QuestionService {
 
     private final QuestionParser questionParser;
 
-    private final QuestionCache questionCache;
+    private final QuestionProvider questionProvider;
 
     private final Scoring scoring;
+
+    private final Cache cache;
 
     private Text fetch() {
         String jsonStr = HttpUtil.
@@ -65,11 +69,11 @@ public class QuestionService {
     }
 
     public void saveCache() {
-        questionCache.initCache(fetch());
+        cache.initCache(fetch());
     }
 
     public Text getBaseQuestionInfo() {
-        return new Text(questionCache.getText(), questionCache.getBaseQuestionList());
+        return new Text(cache.getText(), questionProvider.getBaseQuestionList());
     }
 
     public void saveQuestionTime(List<QuestionTime> timeList) {
@@ -81,14 +85,35 @@ public class QuestionService {
     }
 
     public Question getNextDrillQuestion() {
-        //scoreCache.getScoreList() 의 questionGroup이 전부 BASE일 때만 questionCache.saveDrillStartQuestionList을 호출
-        // questionCache.saveDrillStartQuestionList(resultList);
-        //
+        /*
 
-        return null;
-    }
+        [본 로직]
+        PREV_SCORE_INFO_KEY 체크
+            없으면 - DRILL_START_QUESTION_INFO_KEY 에서 한개 제거 한 문제 반환
+            있으면 - PREV_SCORE_INFO_KEY를 기반으로 문제를 계산해서 1개 반환
 
-    public List<Question> getCurrentQuestionList(){
-        return questionCache.getCurrentQuestionList();
+        본 로직 종료 조건 : DRILL_START_QUESTION_INFO_KEY 가 빈 리스트가 될때까지 반복
+         */
+
+        // 전처리 - 최초 드릴문제 계산 + 계산이 끝나면 이전 채점 결과를 캐시에서 삭제
+        if(scoring.isPrevScoreTypeBase()) {
+            questionProvider.saveDrillStartQuestionList();
+        }
+
+        /*
+        List<Question> targetQuestionList = new ArrayList<>();
+
+        if(scoring.isPrevScoreEmpty()) {
+            targetQuestionList.add(questionProvider.getDrillStartQuestion());
+        }else {
+            List<Score> prevScoreList = scoring.getPrevScore();
+            targetQuestionList.add(questionProvider.getDrillNextQuestion(prevScoreList.get(0)));
+        }
+
+        cache.setCurrentQuestionList(targetQuestionList);
+        return targetQuestionList.get(0);
+
+         */
+      return null;
     }
 }

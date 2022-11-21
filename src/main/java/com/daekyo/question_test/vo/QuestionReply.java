@@ -1,6 +1,7 @@
 package com.daekyo.question_test.vo;
 
 import com.daekyo.question_test.vo.enum_vo.CorrectStatus;
+import com.daekyo.question_test.vo.enum_vo.DrillStatus;
 import com.daekyo.question_test.vo.enum_vo.QuestionDifficulty;
 import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import com.daekyo.question_test.vo.enum_vo.QuestionType;
@@ -25,6 +26,8 @@ public class QuestionReply {
     private final String commentary;
     private final String videoUrl;
     private final Question chkQuestion;
+
+    private final DrillStatus drillStatus;
 
     @Setter
     private CorrectStatus result;

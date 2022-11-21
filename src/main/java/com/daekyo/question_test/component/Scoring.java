@@ -1,7 +1,5 @@
 package com.daekyo.question_test.component;
 
-import com.daekyo.question_test.Constant;
-import com.daekyo.question_test.util.CacheUtil;
 import com.daekyo.question_test.vo.Question;
 import com.daekyo.question_test.vo.QuestionReply;
 import com.daekyo.question_test.vo.Score;
@@ -18,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class Scoring {
 
-  private final ScoreCache scoreCache;
+  private final Cache cache;
 
   private List<QuestionReply> mergeQuestionAndReply(List<Question> currentQuestionList,
       List<UserReply> userReplyList) {
@@ -39,15 +37,6 @@ public class Scoring {
         ? CorrectStatus.CORRECT : CorrectStatus.INCORRECT;
   }
 
-  private DrillStatus chkDrillStatus(QuestionReply questionReply, List<Score> prevScoreList) {
-    Score prevScore = prevScoreList.stream()
-        .filter(prev -> prev.getQuestionType() == questionReply.getQuestionType())
-        .collect(Collectors.toList()).get(0);
-
-    return prevScore.getCorrectStatus() == CorrectStatus.CORRECT ? DrillStatus.DRILL_UP :
-        DrillStatus.DRILL_DOWN;
-  }
-
   private int calcScore(QuestionReply questionReply) {
     CorrectStatus result = chkResult(questionReply);
 
@@ -56,7 +45,7 @@ public class Scoring {
         questionReply.getQuestionDifficulty().getCorrectScore()
         : questionReply.getQuestionDifficulty().getInCorrectScore();
     }else {
-      DrillStatus drillStatus = chkDrillStatus(questionReply, scoreCache.getScoreList());
+      DrillStatus drillStatus = questionReply.getDrillStatus();
       return result == CorrectStatus.CORRECT ?
           drillStatus.getCorrectScore() : drillStatus.getInCorrectScore();
     }
@@ -70,16 +59,33 @@ public class Scoring {
         questionReply.getVideoUrl(), questionReply.getChkQuestion());
   }
 
-  @SuppressWarnings("unchecked")
   public List<Score> scoring(List<UserReply> userReplyList) {
-    List<Question> currentQuestionList = (List<Question>)CacheUtil.get(Constant.CURRENT_QUESTION_INFO_KEY);
-
-    List<QuestionReply> questionReplyList = mergeQuestionAndReply(currentQuestionList, userReplyList);
+    List<QuestionReply> questionReplyList =
+        mergeQuestionAndReply(cache.getCurrentQuestionList(), userReplyList);
 
     List<Score> scoreList = questionReplyList.stream().map(this::convertScore).collect(Collectors.toList());
-    scoreCache.setScoreList(scoreList);
+    cache.setScoreList(scoreList);
 
     // todo DB에 채점이력을 저장하는 기능 추가
     return scoreList;
+  }
+
+  // ===============================================================================================
+
+  public List<Score> getPrevScore() {
+    return cache.getScoreList();
+  }
+
+  private boolean isPrevScoreEmpty() {
+    return cache.getScoreList() == null || cache.getScoreList().isEmpty();
+  }
+
+  public boolean isPrevScoreTypeBase() {
+    if(isPrevScoreEmpty()) {
+      return false;
+    }
+
+    return cache.getScoreList().stream()
+        .allMatch(row -> row.getQuestionGroup() == QuestionGroup.BASE);
   }
 }

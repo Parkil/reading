@@ -1,5 +1,6 @@
 package com.daekyo.question_test.vo;
 
+import com.daekyo.question_test.vo.enum_vo.DrillStatus;
 import com.daekyo.question_test.vo.enum_vo.QuestionDifficulty;
 import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import com.daekyo.question_test.vo.enum_vo.QuestionType;
@@ -30,6 +31,10 @@ public class Question {
     @Setter
     private QuestionGroup questionGroup;
 
+    @JsonIgnore
+    @Setter
+    private DrillStatus drillStatus;
+
     public QuestionReply convertQuestionReply(String userInputReply)  {
         return new QuestionReply(questionKey,
             questionGroup,
@@ -40,6 +45,7 @@ public class Question {
             userInputReply,
             commentary,
             videoUrl,
-            chkQuestion);
+            chkQuestion,
+            drillStatus);
     }
 }
