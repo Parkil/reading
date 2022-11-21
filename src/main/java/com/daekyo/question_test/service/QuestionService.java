@@ -10,7 +10,9 @@ import com.daekyo.question_test.vo.QuestionTime;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.Text;
 import com.daekyo.question_test.vo.UserReply;
+import com.daekyo.question_test.vo.enum_vo.QuestionType;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -84,36 +86,39 @@ public class QuestionService {
         return scoring.scoring(userReplyList);
     }
 
+    private boolean chk(QuestionType questionType) {
+        return questionType != null && cache.getCurrentQuestionList().stream()
+            .allMatch(row -> row.getQuestionType() == questionType);
+    }
+
     public Question getNextDrillQuestion() {
-        /*
-
-        [본 로직]
-        PREV_SCORE_INFO_KEY 체크
-            없으면 - DRILL_START_QUESTION_INFO_KEY 에서 한개 제거 한 문제 반환
-            있으면 - PREV_SCORE_INFO_KEY를 기반으로 문제를 계산해서 1개 반환
-
-        본 로직 종료 조건 : DRILL_START_QUESTION_INFO_KEY 가 빈 리스트가 될때까지 반복
-         */
-
-        // 전처리 - 최초 드릴문제 계산 + 계산이 끝나면 이전 채점 결과를 캐시에서 삭제
+        // 전처리 - 최초 드릴문제 를 캐시에 저장
         if(scoring.isPrevScoreTypeBase()) {
-            questionProvider.saveDrillStartQuestionList();
+            questionProvider.cacheDrillStartQuestionList();
         }
 
-        /*
-        List<Question> targetQuestionList = new ArrayList<>();
+        QuestionType currentDrillType = cache.getCurrentDrillQuestionType();
 
-        if(scoring.isPrevScoreEmpty()) {
-            targetQuestionList.add(questionProvider.getDrillStartQuestion());
-        }else {
-            List<Score> prevScoreList = scoring.getPrevScore();
-            targetQuestionList.add(questionProvider.getDrillNextQuestion(prevScoreList.get(0)));
+        List<Question> targetQuestionList = new ArrayList<>();
+        if(!chk(currentDrillType)) { // 드릴 시작문제
+            Question drillStartQuestion = questionProvider.getDrillStartQuestion(); //todo null 처리 필요
+            targetQuestionList.add(drillStartQuestion);
+            cache.setCurrentDrillQuestionType(drillStartQuestion.getQuestionType());
+        }else { // 드릴 연관문제
+            List<Score> prevScoreList = cache.getScoreList();
+            Question drillOngoingQuestion = questionProvider.getDrillNextQuestion(prevScoreList.get(0));
+
+            // 드릴 연관문제가 다 떨어진 경우
+            if(drillOngoingQuestion == null) {
+                drillOngoingQuestion = questionProvider.getDrillStartQuestion(); // todo null 처리 필요
+                cache.setCurrentDrillQuestionType(drillOngoingQuestion.getQuestionType());
+            }
+
+            targetQuestionList.add(drillOngoingQuestion);
         }
 
         cache.setCurrentQuestionList(targetQuestionList);
         return targetQuestionList.get(0);
 
-         */
-      return null;
     }
 }

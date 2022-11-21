@@ -23,6 +23,7 @@ public class ClassifyQuestion {
 
     List<Question> targetQuestionList = new ArrayList<>();
     List<Question> otherQuestionList = new ArrayList<>();
+
     for(Question question : allQuestionList) {
       CalcQuestionDifficulty target = getTarget(question, targetList);
 

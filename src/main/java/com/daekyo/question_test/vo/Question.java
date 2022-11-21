@@ -18,6 +18,7 @@ public class Question {
     private final QuestionType questionType;
     private final QuestionDifficulty questionDifficulty;
     private final String questionStr;
+
     private final String correct;
 
     @JsonIgnore

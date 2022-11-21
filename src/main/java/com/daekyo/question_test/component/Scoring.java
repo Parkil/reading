@@ -70,18 +70,8 @@ public class Scoring {
     return scoreList;
   }
 
-  // ===============================================================================================
-
-  public List<Score> getPrevScore() {
-    return cache.getScoreList();
-  }
-
-  private boolean isPrevScoreEmpty() {
-    return cache.getScoreList() == null || cache.getScoreList().isEmpty();
-  }
-
   public boolean isPrevScoreTypeBase() {
-    if(isPrevScoreEmpty()) {
+    if(cache.getScoreList() == null || cache.getScoreList().isEmpty()) {
       return false;
     }
 

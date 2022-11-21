@@ -26,7 +26,7 @@ public class QuestionProvider {
     return classifyQuestionPair.getLeft();
   }
 
-  public void saveDrillStartQuestionList() {
+  public void cacheDrillStartQuestionList() {
     Pair<List<Question>, List<Question>> classifyQuestionPair =
         classifyQuestion.classify(cache.getReserveQuestionList(), cache.getScoreList());
 
@@ -35,7 +35,8 @@ public class QuestionProvider {
   }
 
   public Question getDrillStartQuestion() {
-    return cache.getDrillStartQuestionList().remove(0);
+    List<Question> questionList = cache.getDrillStartQuestionList();
+    return (questionList.isEmpty()) ? null : questionList.remove(0);
   }
 
   public Question getDrillNextQuestion(Score score) {
