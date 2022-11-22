@@ -5,9 +5,11 @@ import com.daekyo.question_test.util.CacheUtil;
 import com.daekyo.question_test.vo.Question;
 import com.daekyo.question_test.vo.Score;
 import com.daekyo.question_test.vo.Text;
+import com.daekyo.question_test.vo.enum_vo.QuestionGroup;
 import com.daekyo.question_test.vo.enum_vo.QuestionType;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,15 @@ public class Cache {
   public List<Score> getScoreList() {
     List<Score> scoreList =  (List<Score>)CacheUtil.get(Constant.PREV_SCORE_INFO_KEY);
     return (scoreList == null) ? Collections.emptyList() : scoreList;
+  }
+
+  public boolean isQuestionGroupIsBaseInScoreList() {
+    if(getScoreList().isEmpty()) {
+      return false;
+    }
+
+    return getScoreList().stream()
+        .allMatch(row -> row.getQuestionGroup() == QuestionGroup.BASE);
   }
 
   public void initCache(Text text) {
